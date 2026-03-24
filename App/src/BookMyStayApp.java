@@ -1,32 +1,68 @@
+import java.util.HashMap;
+
 /**
- * Entry point for Hotel Booking Application
+ * BookMyStayApp
+ * Demonstrates centralized room inventory management using HashMap
+ *
+ * @author Roger
+ * @version 2.0
  */
+
+class RoomInventory {
+
+    private HashMap<String, Integer> availabilityMap;
+
+    // Constructor initializes inventory
+    public RoomInventory() {
+        availabilityMap = new HashMap<>();
+
+        availabilityMap.put("Single Room", 5);
+        availabilityMap.put("Double Room", 3);
+        availabilityMap.put("Suite Room", 2);
+    }
+
+    // Get availability
+    public int getAvailability(String roomType) {
+        return availabilityMap.getOrDefault(roomType, 0);
+    }
+
+    // Update availability
+    public void updateAvailability(String roomType, int newCount) {
+        if (availabilityMap.containsKey(roomType)) {
+            availabilityMap.put(roomType, newCount);
+        } else {
+            System.out.println("Room type not found.");
+        }
+    }
+
+    // Display inventory
+    public void displayInventory() {
+        System.out.println("=== BookMyStay Room Inventory ===");
+        for (String roomType : availabilityMap.keySet()) {
+            System.out.println(roomType + " → Available: " + availabilityMap.get(roomType));
+        }
+    }
+}
+
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // Create room objects (Polymorphism)
-        Room single = new SingleRoom();
-        Room doubleRoom = new DoubleRoom();
-        Room suite = new SuiteRoom();
+        // Initialize inventory
+        RoomInventory inventory = new RoomInventory();
 
-        // Static availability variables
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
+        // Display initial inventory
+        inventory.displayInventory();
 
-        System.out.println("=== Hotel Room Availability ===");
+        System.out.println("\nUpdating availability...\n");
 
-        // Display details + availability
-        single.displayDetails();
-        System.out.println("Available: " + singleAvailable + "\n");
+        // Update values
+        inventory.updateAvailability("Single Room", 4);
+        inventory.updateAvailability("Suite Room", 1);
 
-        doubleRoom.displayDetails();
-        System.out.println("Available: " + doubleAvailable + "\n");
+        // Display updated inventory
+        inventory.displayInventory();
 
-        suite.displayDetails();
-        System.out.println("Available: " + suiteAvailable + "\n");
-
-        System.out.println("Application terminated.");
+        System.out.println("\nBookMyStayApp terminated.");
     }
 }
