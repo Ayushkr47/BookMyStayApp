@@ -1,11 +1,14 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * BookMyStayApp
- * Demonstrates read-only search over centralized inventory
+ * Demonstrates booking request intake using a FIFO Queue
+ * (no inventory mutation at this stage)
  *
  * @author Roger
- * @version 3.0
+ * @version 4.0
  */
 
 // -------------------- DOMAIN MODEL --------------------
@@ -48,31 +51,53 @@ class RoomInventory {
         availabilityMap = new HashMap<>();
         availabilityMap.put("Single Room", 5);
         availabilityMap.put("Double Room", 3);
-        availabilityMap.put("Suite Room", 0); // unavailable example
+        availabilityMap.put("Suite Room", 2);
     }
 
-    // Read-only access
+    // Read-only access only
     public int getAvailability(String roomType) {
         return availabilityMap.getOrDefault(roomType, 0);
     }
 }
 
-// -------------------- SEARCH SERVICE (READ-ONLY) --------------------
-class SearchService {
+// -------------------- RESERVATION (REQUEST OBJECT) --------------------
+class Reservation {
+    private String guestName;
+    private String roomType;
 
-    public void searchAvailableRooms(RoomInventory inventory, Room[] rooms) {
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
 
-        System.out.println("=== Available Rooms (BookMyStay) ===");
+    public String getGuestName() { return guestName; }
+    public String getRoomType() { return roomType; }
 
-        for (Room room : rooms) {
+    public void displayRequest() {
+        System.out.println("Guest: " + guestName + " requested " + roomType);
+    }
+}
 
-            int available = inventory.getAvailability(room.getType());
+// -------------------- BOOKING REQUEST QUEUE --------------------
+class BookingQueue {
 
-            // Defensive check: show only available rooms
-            if (available > 0) {
-                room.displayDetails();
-                System.out.println("Available: " + available + "\n");
-            }
+    private Queue<Reservation> queue;
+
+    public BookingQueue() {
+        queue = new LinkedList<>();
+    }
+
+    // Add request (enqueue)
+    public void addRequest(Reservation reservation) {
+        queue.offer(reservation);
+        System.out.println("Request added to queue: " + reservation.getGuestName());
+    }
+
+    // Display all queued requests (no processing yet)
+    public void displayQueue() {
+        System.out.println("\n=== Booking Request Queue (FIFO Order) ===");
+        for (Reservation r : queue) {
+            r.displayRequest();
         }
     }
 }
@@ -82,22 +107,23 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        // Initialize inventory
+        // Inventory exists but is NOT modified here
         RoomInventory inventory = new RoomInventory();
 
-        // Create room objects (domain)
-        Room[] rooms = {
-                new SingleRoom(),
-                new DoubleRoom(),
-                new SuiteRoom()
-        };
+        // Booking request queue (FIFO)
+        BookingQueue bookingQueue = new BookingQueue();
 
-        // Search service (read-only)
-        SearchService searchService = new SearchService();
+        // Guests submit booking requests
+        bookingQueue.addRequest(new Reservation("Alice", "Single Room"));
+        bookingQueue.addRequest(new Reservation("Bob", "Double Room"));
+        bookingQueue.addRequest(new Reservation("Charlie", "Suite Room"));
+        bookingQueue.addRequest(new Reservation("David", "Single Room"));
 
-        // Guest initiates search
-        searchService.searchAvailableRooms(inventory, rooms);
+        // Show queued requests in arrival order
+        bookingQueue.displayQueue();
 
-        System.out.println("Search completed. System state unchanged.");
+        System.out.println("\nAll requests stored in arrival order.");
+        System.out.println("No inventory changes performed.");
+        System.out.println("Ready for allocation phase.");
     }
 }
